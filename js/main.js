@@ -148,11 +148,11 @@ createRestaurantHTML = (restaurant) => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = imgUrl;
-  image.title = restaurant.name;
-  image.alt = restaurant.name;
+  image.title = restaurant.name+' Restaurant';
+  image.alt = restaurant.name+' Restaurant';
   picture.append(image);
 
-  const name = document.createElement('h1');
+  const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
   name.tabIndex = '0';
   li.append(name);
