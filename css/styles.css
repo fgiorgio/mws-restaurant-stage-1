@@ -168,6 +168,15 @@ nav h1 a {
   max-width: 100%;
   min-width: 100%;
 }
+#restaurants-list .empty-img {
+  background-color: #ccc;
+  display: block;
+  margin: 0;
+  max-width: 100%;
+  min-width: 100%;
+  padding-top: 75%;
+  height: 0;
+}
 #restaurants-list li h2 {
   color: #b50000;
   font-family: Arial,sans-serif;
