@@ -4,6 +4,32 @@
 class DBHelper {
 
   /**
+   * Store data into IndexedDB.
+   */
+  static idbInit() {
+    idb.open('mws-restaurant-stage', 1, function(upgradeDB) {
+      switch (upgradeDB.oldVersion) {
+        case 0:
+          upgradeDB.createObjectStore('restaurant-reviews', {keyPath: 'id'});
+      }
+    }).then(function(db){
+      DBHelper.fetchRestaurants((error, restaurants)=>{
+        if (error) {
+          console.error(error);
+        } else {
+          let tx = db.transaction('restaurant-reviews', 'readwrite');
+          let objStore = tx.objectStore('restaurant-reviews');
+          restaurants.map(function (obj) {
+            objStore.put(obj);
+          });
+          tx.complete
+            .catch(()=>console.log('IndexedDB error during update!'))
+        }
+      });
+    });
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
@@ -22,20 +48,6 @@ class DBHelper {
       .then((response)=>response.json())
         .then((data)=>callback(null, data))
       .catch((error)=>callback(error, null));
-/*
-      DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error) {
-        callback(error, null);
-      } else {
-        const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
-        } else { // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
-        }
-      }
-    });
-    */
   }
 
   /**
