@@ -3,51 +3,76 @@
  */
 class DBHelper {
 
-  /**
-   * Store data into IndexedDB.
-   */
-  static idbInit() {
-    idb.open('mws-restaurant-stage', 1, function(upgradeDB) {
+  static IDBOpen(){
+    return idb.open('mws-restaurant-stage', 1, function(upgradeDB) {
       switch (upgradeDB.oldVersion) {
         case 0:
           upgradeDB.createObjectStore('restaurant-reviews', {keyPath: 'id'});
       }
-    }).then(function(db){
-      DBHelper.fetchRestaurants((error, restaurants)=>{
-        if (error) {
-          console.error(error);
-        } else {
-          let tx = db.transaction('restaurant-reviews', 'readwrite');
-          let objStore = tx.objectStore('restaurant-reviews');
-          restaurants.map(function (obj) {
+    });
+  }
+
+  /**
+   * Update data into IndexedDB.
+   */
+  static updateIDB(data) {
+    DBHelper.IDBOpen()
+      .then(function(db){
+        let tx = db.transaction('restaurant-reviews', 'readwrite');
+        let objStore = tx.objectStore('restaurant-reviews');
+        if(data.length){
+          objStore.clear();
+          data.map(function (obj) {
             objStore.put(obj);
           });
-          tx.complete
-            .catch(()=>console.log('IndexedDB error during update!'))
+        }else{
+          objStore.put(data);
         }
+        tx.complete
+          .catch(()=>console.log('IndexedDB error during update!'))
       });
-    });
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    fetch(`http://localhost:1337/restaurants`)
-      .then((response)=>response.json())
-        .then((data)=>callback(null, data))
-      .catch((error)=>callback(error, null));
+    DBHelper.IDBOpen()
+      .then(function(db){
+        let tx = db.transaction('restaurant-reviews', 'readonly');
+        let objStore = tx.objectStore('restaurant-reviews');
+        return objStore.getAll();
+      }).then(function (data) {
+        if(data.length){
+          callback(null, data);
+        }else{
+          fetch(`http://localhost:1337/restaurants`)
+            .then((response)=>response.json())
+            .then((data)=>{
+              DBHelper.updateIDB(data);
+              return callback(null, data);
+            })
+            .catch((error)=>callback(error, null));
+        }
+      });
   }
 
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    // fetch all restaurants with proper error handling.
-    fetch(`http://localhost:1337/restaurants/${id}`)
-      .then((response)=>response.json())
-        .then((data)=>callback(null, data))
-      .catch((error)=>callback(error, null));
+    DBHelper.fetchRestaurants((error, restaurants) => {
+      if (error) {
+        callback(error, null);
+      } else {
+        const restaurant = restaurants.find((r) => r.id == id);
+        if (restaurant) {
+          callback(null, restaurant);
+        } else {
+          callback('Restaurant does not exist', null);
+        }
+      }
+    });
   }
 
   /**

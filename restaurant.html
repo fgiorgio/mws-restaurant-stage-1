@@ -4,11 +4,14 @@
 <head>
   <meta charset="utf-8">
   <title>Restaurant Info</title>
+  <meta name="description" content="Restaurant Reviews, a project for MWS Udacity Nanodegree">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#007dbb">
+  <link rel="manifest" href="manifest.json">
   <!-- Normalize.css for better cross-browser consistency -->
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <!-- Main CSS file -->
-  <link rel="stylesheet" href="css/styles.css" type="text/css">
+  <link rel="stylesheet" href="css/styles.min.css" type="text/css">
 </head>
 
 <body class="inside">
@@ -62,14 +65,14 @@
   <!-- End footer -->
 
   <!-- Beginning scripts -->
-  <script type="text/javascript" src="node_modules/picturefill/dist/picturefill.min.js"></script>
   <script type="text/javascript" src="node_modules/idb/lib/idb.js"></script>
-  <!-- Database helpers -->
   <script type="text/javascript" src="js/dbhelper.js"></script>
-  <!-- Main javascript file -->
   <script type="text/javascript" src="js/restaurant_info.js"></script>
-  <script type="text/javascript" src="js/common.js"></script>
-  <!-- Google Maps -->
+  <script>
+      if(navigator.serviceWorker) {
+          navigator.serviceWorker.register('/sw.js');
+      }
+  </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAhHH97djBuiW1MX2YZ5fhywqd9Ge6tfTI&libraries=places&callback=initMap"></script>
   <!-- End scripts -->
 
