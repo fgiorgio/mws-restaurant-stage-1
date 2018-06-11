@@ -14,6 +14,7 @@ self.addEventListener('install', function(event) {
                 '/restaurant.html',
                 '/css/styles.min.css',
                 '/js/main.js',
+                '/js/common.js',
                 '/js/restaurant_info.js',
                 '/js/dbhelper.js',
                 '/node_modules/idb/lib/idb.js',
