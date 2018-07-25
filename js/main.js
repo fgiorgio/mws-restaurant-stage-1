@@ -179,7 +179,32 @@ createRestaurantHTML = (restaurant) => {
   more.setAttribute('aria-label', 'View Details of '+restaurant.name);
   li.append(more);
 
+  const addFav = document.createElement('button');
+  addFav.innerHTML = '❤';
+  addFav.className = 'add-fav';
+  addFav.onclick=function(){
+    const isFavNow = !restaurant.is_favorite;
+    DBHelper.updateFavouriteStatus(restaurant.id,isFavNow);
+    restaurant.is_favorite=!restaurant.is_favorite;
+    changeFavElementClass(addFav,restaurant.is_favorite);
+  };
+  changeFavElementClass(addFav,restaurant.is_favorite);
+  li.append(addFav);
+
   return li
+};
+
+/**
+ * Change favourite button class on click
+ */
+changeFavElementClass = (el,fav)=>{
+  if(!fav){
+    el.setAttribute('aria-label', 'Add to favourites');
+    el.classList.remove('add-fav-active');
+  }else{
+    el.setAttribute('aria-label', 'Remove from favourites');
+    el.classList.add('add-fav-active');
+  }
 };
 
 /**

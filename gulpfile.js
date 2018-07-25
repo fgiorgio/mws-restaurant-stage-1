@@ -5,8 +5,7 @@ const rename = require('gulp-rename');
 
 
 gulp.task('default', function() {
-
-    gulp.watch('scss/**/*.scss',['style']);
+    gulp.watch('sass/**/*.scss',['style']);
 });
 
 

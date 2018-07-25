@@ -196,4 +196,24 @@ class DBHelper {
     return marker;
   }
 
+  /**
+   * Change Favourite flag for a restaurant
+  */
+  static updateFavouriteStatus(restaurantId, isFavourite){
+    fetch(`http://localhost:1337/restaurants/${restaurantId}/?is_favorite=${isFavourite}`,{
+      method: 'PUT'
+    })
+    .then(()=>{
+      DBHelper.IDBOpen()
+      .then(function(db){
+        const tx = db.transaction('restaurant-reviews','readwrite');
+        const restaurantsStore = tx.objectStore('restaurant-reviews');
+        restaurantsStore.get(restaurantId)
+            .then(restaurant=>{
+                restaurant.is_favorite=isFavourite;
+                restaurantsStore.put(restaurant);
+            })
+      });
+    })
+  }
 }
