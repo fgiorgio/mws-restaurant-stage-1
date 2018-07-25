@@ -279,14 +279,14 @@ nav {
     color: #666;
   }
 }
-#restaurant-container, #reviews-container {
+#restaurant-container, #reviews-container, #new-review {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 140px 40px 30px;
   width: calc(50% - 80px);
 }
 #reviews-container {
-  padding: 30px 40px 80px;
+  padding: 30px 40px 30px;
   h3 {
     color: #b50000;
     font-size: 24pt;
@@ -345,6 +345,76 @@ nav {
   }
 }
 
+#new-review {
+  padding: 30px 40px 80px;
+  #new-review-form {
+    background-color: #fff;
+    border: 2px solid #f3f3f3;
+    list-style-type: none;
+    display: block;
+    margin: 0 0 30px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    >div {
+      background-color: #333;
+      padding: 10px 0;
+      margin: 0 0 30px 0;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      p {
+        color: #fff;
+        font-size: 1.1rem;
+        margin: 0;
+        padding: 0 20px;
+      }
+    }
+    label {
+      padding: 5px 20px;
+    }
+    input, select {
+      width: calc(100% - 60px);
+      margin: 0 0 20px 20px;
+      border: 1px solid #ddd;
+      font-family: Arial,sans-serif;
+      font-size: 11pt;
+      height: 35px;
+      letter-spacing: 0;
+      padding: 0 10px;
+    }
+    select {
+      width: calc(100% - 40px);
+    }
+    textarea {
+      width: calc(100% - 60px);
+      margin: 0 0 20px 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      font-family: Arial,sans-serif;
+      font-size: 11pt;
+      letter-spacing: 0;
+    }
+    button {
+      background-color: #b50000;
+      border: none;
+      color: #fff;
+      display: inline-block;
+      font-size: 10pt;
+      margin: 0 0 30px 20px;
+      padding: 10px 30px 10px 30px;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+  }
+}
+
 /* ====================== Media Queries ====================== */
 @media (max-width: 760px) {
   #restaurants-list li {
@@ -370,7 +440,7 @@ nav {
   #breadcrumb {
     width: calc(100% - 80px);
   }
-  #restaurant-container, #reviews-container {
+  #restaurant-container, #reviews-container, #new-review {
     padding: 30px 40px;
     width: calc(100% - 80px);
   }
