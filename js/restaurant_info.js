@@ -42,6 +42,13 @@ fetchRestaurantFromURL = (callback) => {
       fillRestaurantHTML();
       callback(null, restaurant)
     });
+    DBHelper.fetchReviewsByRestaurantId(id, (error, reviews) => {
+        if (!reviews) {
+            console.error(error);
+            return;
+        }
+        fillReviewsHTML(reviews);
+    });
   }
 };
 
@@ -76,7 +83,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  //fillReviewsHTML();
 };
 
 /**
@@ -136,7 +143,8 @@ createReviewHTML = (review) => {
   div.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  let dateObj = new Date(review.updatedAt);
+  date.innerHTML = dateObj.getDate()+'-'+(dateObj.getMonth()+1)+'-'+dateObj.getFullYear();
   date.tabIndex = '0';
   div.appendChild(date);
 
@@ -179,4 +187,26 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+};
+
+/**
+ * Add a new review for a restaurant
+ */
+addReview = ()=>{
+  DBHelper.addReview(JSON.stringify({
+      restaurant_id: self.restaurant.id,
+      name: document.getElementById('name').value,
+      rating: parseInt(document.getElementById('rating').value),
+      comments: document.getElementById('comments').value,
+  }),(error,review)=>{
+    if(!review){
+      alert('Impossible to add the review! Try later.');
+      return;
+    }
+    document.getElementById('reviews-list').appendChild(createReviewHTML(review))
+    document.getElementById('name').value='';
+    document.getElementById('rating').value='';
+    document.getElementById('comments').value='';
+  });
+
 };

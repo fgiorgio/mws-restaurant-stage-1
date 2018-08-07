@@ -46,6 +46,22 @@ self.addEventListener('activate', function(event) {
  */
 self.addEventListener('fetch', function(event) {
     event.respondWith(
+        caches.open(staticCacheName).then(cache => {
+            return fetch(event.request).then(response => {
+                if (event.request.method !== 'GET') {
+                    return response;
+                }
+                if(!event.request.url.startsWith('http://localhost:1337')){
+                    cache.put(event.request, response.clone());
+                }
+                return response;
+            });
+        }).catch(() => {
+            return caches.match(event.request);
+        })
+    );
+    /*
+    event.respondWith(
         caches.open(staticCacheName).then(function(cache) {
             return cache.match(event.request, {ignoreSearch: true}).then(function (response) {
                 if (response) {
@@ -61,9 +77,10 @@ self.addEventListener('fetch', function(event) {
                                 cache.put(event.request, responseToCache);
                             });
                         return response;
-                    });
+                    }).catch(error=>console.error(error));
                 }
-            });
+            }).catch(error=>console.error(error));
         })
     );
+    */
 });

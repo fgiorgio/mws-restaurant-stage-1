@@ -183,11 +183,19 @@ createRestaurantHTML = (restaurant) => {
   addFav.innerHTML = '❤';
   addFav.className = 'add-fav';
   addFav.onclick=function(){
-    const isFavNow = !restaurant.is_favorite;
-    DBHelper.updateFavouriteStatus(restaurant.id,isFavNow);
-    restaurant.is_favorite=!restaurant.is_favorite;
+    if(restaurant.is_favorite===true || restaurant.is_favorite==='true'){
+      restaurant.is_favorite=false;
+    }else{
+      restaurant.is_favorite=true;
+    }
+    DBHelper.updateFavouriteStatus(restaurant.id,restaurant.is_favorite);
     changeFavElementClass(addFav,restaurant.is_favorite);
   };
+  if(restaurant.is_favorite===true || restaurant.is_favorite==='true'){
+    restaurant.is_favorite=true;
+  }else{
+    restaurant.is_favorite=false;
+  }
   changeFavElementClass(addFav,restaurant.is_favorite);
   li.append(addFav);
 

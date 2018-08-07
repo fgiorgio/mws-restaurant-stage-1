@@ -4,22 +4,25 @@
 class DBHelper {
 
   static IDBOpen(){
-    return idb.open('mws-restaurant-stage', 1, function(upgradeDB) {
+    return idb.open('mws-restaurant-stage', 2, function(upgradeDB) {
       switch (upgradeDB.oldVersion) {
         case 0:
-          upgradeDB.createObjectStore('restaurant-reviews', {keyPath: 'id'});
+          upgradeDB.createObjectStore('restaurants', {keyPath: 'id'});
+        case 1:
+          const reviewsStore = upgradeDB.createObjectStore('reviews', {keyPath: 'id'});
+          reviewsStore.createIndex('restaurant','restaurant_id');
       }
     });
   }
 
   /**
-   * Update data into IndexedDB.
+   * Update restaurants into IndexedDB.
    */
-  static updateIDB(data) {
+  static updateIDBRestaurants(data) {
     DBHelper.IDBOpen()
       .then(function(db){
-        let tx = db.transaction('restaurant-reviews', 'readwrite');
-        let objStore = tx.objectStore('restaurant-reviews');
+        let tx = db.transaction('restaurants', 'readwrite');
+        let objStore = tx.objectStore('restaurants');
         if(data.length){
           objStore.clear();
           data.map(function (obj) {
@@ -37,24 +40,27 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    DBHelper.IDBOpen()
+    fetch(`http://localhost:1337/restaurants`)
+    .then((response)=>response.json())
+    .then((data)=>{
+        DBHelper.updateIDBRestaurants(data);
+        return callback(null, data);
+    })
+    .catch((error)=>{
+      DBHelper.IDBOpen()
       .then(function(db){
-        let tx = db.transaction('restaurant-reviews', 'readonly');
-        let objStore = tx.objectStore('restaurant-reviews');
+        let tx = db.transaction('restaurants', 'readonly');
+        let objStore = tx.objectStore('restaurants');
         return objStore.getAll();
-      }).then(function (data) {
-        if(data.length){
+      })
+      .then(function (data) {
+        if (data.length) {
           callback(null, data);
         }else{
-          fetch(`http://localhost:1337/restaurants`)
-            .then((response)=>response.json())
-            .then((data)=>{
-              DBHelper.updateIDB(data);
-              return callback(null, data);
-            })
-            .catch((error)=>callback(error, null));
+          callback(error, null);
         }
-      });
+      })
+    })
   }
 
   /**
@@ -206,8 +212,8 @@ class DBHelper {
     .then(()=>{
       DBHelper.IDBOpen()
       .then(function(db){
-        const tx = db.transaction('restaurant-reviews','readwrite');
-        const restaurantsStore = tx.objectStore('restaurant-reviews');
+        const tx = db.transaction('restaurants','readwrite');
+        const restaurantsStore = tx.objectStore('restaurants');
         restaurantsStore.get(restaurantId)
             .then(restaurant=>{
                 restaurant.is_favorite=isFavourite;
@@ -215,5 +221,103 @@ class DBHelper {
             })
       });
     })
+  }
+
+  /**
+   * Update reviews into IndexedDB.
+   */
+  static updateIDBReviews(data) {
+      DBHelper.IDBOpen()
+          .then(function(db){
+              let tx = db.transaction('reviews', 'readwrite');
+              let objStore = tx.objectStore('reviews');
+              if(data.length){
+                  //objStore.clear();
+                  data.map(function (obj) {
+                      objStore.put(obj);
+                  });
+              }else{
+                  objStore.put(data);
+              }
+              tx.complete
+                  .catch(()=>console.log('IndexedDB error during update!'))
+          });
+  }
+
+    /**
+   * Fetch reviews by restaurant ID
+   */
+  static fetchReviews(callback){
+      fetch(`http://localhost:1337/reviews`)
+          .then((response)=>response.json())
+          .then((data)=>{
+              DBHelper.updateIDBReviews(data);
+              return callback(null, data);
+          })
+          .catch((error)=>{
+              DBHelper.IDBOpen()
+                  .then(function(db){
+                      let tx = db.transaction('reviews', 'readonly');
+                      let objStore = tx.objectStore('reviews');
+                      let index = objStore.index('restaurant')
+                      return index.getAll();
+                  })
+                  .then(function (data) {
+                      if (data.length) {
+                          callback(null, data);
+                      }else{
+                          callback(error, null);
+                      }
+                  })
+          })
+  }
+
+  /**
+   * Fetch a review by its restaurant ID.
+   */
+  static fetchReviewsByRestaurantId(id, callback) {
+      fetch(`http://localhost:1337/reviews/?restaurant_id=${id}`)
+          .then((response)=>response.json())
+          .then((data)=>{
+              DBHelper.updateIDBReviews(data);
+              return callback(null, data);
+          })
+          .catch((error)=>{
+              DBHelper.IDBOpen()
+                  .then(function(db){
+                      let tx = db.transaction('reviews', 'readonly');
+                      let objStore = tx.objectStore('reviews');
+                      let index = objStore.index('restaurant')
+                      return index.getAll();
+                  })
+                  .then(function (data) {
+                      if (data.length) {
+                          callback(null, data);
+                      }else{
+                          callback(error, null);
+                      }
+                  })
+          });
+  }
+
+  /**
+   * Adds a review to a restaurant
+   */
+  static addReview(review,callback) {
+    fetch(`http://localhost:1337/reviews/`, {
+      method: 'POST',
+      body: review
+    })
+    .then((response)=>response.json())
+    .then((data)=>{
+        DBHelper.IDBOpen()
+            .then(function(db){
+                let tx = db.transaction('reviews', 'readwrite');
+                let objStore = tx.objectStore('reviews');
+                objStore.put(data);
+            });
+        callback(null,data);
+    })
+    .catch(error=>callback(error,null));
   }
 }
