@@ -206,21 +206,27 @@ class DBHelper {
    * Change Favourite flag for a restaurant
   */
   static updateFavouriteStatus(restaurantId, isFavourite){
-    fetch(`http://localhost:1337/restaurants/${restaurantId}/?is_favorite=${isFavourite}`,{
-      method: 'PUT'
-    })
-    .then(()=>{
-      DBHelper.IDBOpen()
-      .then(function(db){
-        const tx = db.transaction('restaurants','readwrite');
-        const restaurantsStore = tx.objectStore('restaurants');
-        restaurantsStore.get(restaurantId)
-            .then(restaurant=>{
-                restaurant.is_favorite=isFavourite;
-                restaurantsStore.put(restaurant);
+    if(navigator.onLine){
+        fetch(`http://localhost:1337/restaurants/${restaurantId}/?is_favorite=${isFavourite}`,{
+            method: 'PUT'
+        })
+            .then(()=>{
+                DBHelper.IDBOpen()
+                    .then(function(db){
+                        const tx = db.transaction('restaurants','readwrite');
+                        const restaurantsStore = tx.objectStore('restaurants');
+                        restaurantsStore.get(restaurantId)
+                            .then(restaurant=>{
+                                restaurant.is_favorite=isFavourite;
+                                restaurantsStore.put(restaurant);
+                            })
+                    });
             })
-      });
-    })
+    }else{
+        window.addEventListener('online',function (event) {
+            DBHelper.updateFavouriteStatus(restaurantId, isFavourite);
+        });
+    }
   }
 
   /**
@@ -305,8 +311,8 @@ class DBHelper {
    */
   static addReview(review,callback) {
     fetch(`http://localhost:1337/reviews/`, {
-      method: 'POST',
-      body: review
+        method: 'POST',
+        body: review
     })
     .then((response)=>response.json())
     .then((data)=>{
